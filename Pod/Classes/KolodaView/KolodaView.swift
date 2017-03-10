@@ -48,7 +48,7 @@ public protocol KolodaViewDelegate: class {
     func kolodaShouldMoveBackgroundCard(_ koloda: KolodaView) -> Bool
     func kolodaShouldTransparentizeNextCard(_ koloda: KolodaView) -> Bool
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection)
-    func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection, transform: CATransform3D)
+    func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
     func kolodaDidResetCard(_ koloda: KolodaView)
     func kolodaSwipeThresholdRatioMargin(_ koloda: KolodaView) -> CGFloat?
     func koloda(_ koloda: KolodaView, didShowCardAt index: Int)
@@ -259,8 +259,8 @@ open class KolodaView: UIView, DraggableCardDelegate {
         delegate?.koloda(self, draggedCardWithPercentage: percentage, in: direction)
     }
     
-    func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection, transform: CATransform3D) {
-        delegate?.koloda(self, draggedCardWithPercentage: percentage, in: direction, transform: transform)
+    func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat) {
+        delegate?.koloda(self, draggedCardWithPercentage: percentage, in: direction, transform: transform, translation: translation, rotation: rotation)
     }
     
     func card(_ card: DraggableCardView, shouldSwipeIn direction: SwipeResultDirection) -> Bool {
