@@ -25,7 +25,6 @@ protocol DraggableCardDelegate: class {
 //Drag animation constants
 private let rotationMax: CGFloat = 1.0
 private let defaultRotationAngle = CGFloat(M_PI) / 10.0
-private let scaleMin: CGFloat = 0.8
 public let cardSwipeActionAnimationDuration: TimeInterval  = 0.4
 
 private let screenSize = UIScreen.main.bounds.size
@@ -216,11 +215,8 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate {
         case .changed:
             let rotationStrength = min(dragDistance.x / frame.width, rotationMax)
             let rotationAngle = animationDirectionY * defaultRotationAngle * rotationStrength
-            let scaleStrength = 1 - ((1 - scaleMin) * fabs(rotationStrength))
-            let scale = max(scaleStrength, scaleMin)
     
             var transform = CATransform3DIdentity
-            transform = CATransform3DScale(transform, scale, scale, 1)
             transform = CATransform3DRotate(transform, rotationAngle, 0, 0, 1)
             transform = CATransform3DTranslate(transform, dragDistance.x, dragDistance.y, 0)
             layer.transform = transform
