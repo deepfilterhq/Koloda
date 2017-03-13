@@ -49,6 +49,7 @@ public protocol KolodaViewDelegate: class {
     func kolodaShouldTransparentizeNextCard(_ koloda: KolodaView) -> Bool
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection)
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
+    func koloda(_ koloda: KolodaView, touchLetGoWithPopAnimation translation: CGPoint)
     func kolodaDidResetCard(_ koloda: KolodaView)
     func kolodaSwipeThresholdRatioMargin(_ koloda: KolodaView) -> CGFloat?
     func koloda(_ koloda: KolodaView, didShowCardAt index: Int)
@@ -261,6 +262,10 @@ open class KolodaView: UIView, DraggableCardDelegate {
     
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat) {
         delegate?.koloda(self, draggedCardWithPercentage: percentage, in: direction, transform: transform, translation: translation, rotation: rotation)
+    }
+    
+    func card(_ card: DraggableCardView, touchLetGoWithPopAnimation translation: CGPoint) {
+        delegate?.koloda(self, touchLetGoWithPopAnimation: translation)
     }
     
     func card(_ card: DraggableCardView, shouldSwipeIn direction: SwipeResultDirection) -> Bool {

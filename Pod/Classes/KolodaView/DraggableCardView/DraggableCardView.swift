@@ -13,6 +13,7 @@ protocol DraggableCardDelegate: class {
     
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
+    func card(_ card: DraggableCardView, touchLetGoWithPopAnimation translation: CGPoint)
     func card(_ card: DraggableCardView, wasSwipedIn direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, shouldSwipeIn direction: SwipeResultDirection) -> Bool
     func card(cardWasReset card: DraggableCardView)
@@ -35,7 +36,7 @@ private let cardResetAnimationSpringSpeed: CGFloat = 20.0
 private let cardResetAnimationKey = "resetPositionAnimation"
 private let cardResetAnimationDuration: TimeInterval = 0.2
 
-public class DraggableCardView: UIView, UIGestureRecognizerDelegate {
+public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimationDelegate {
     
     weak var delegate: DraggableCardDelegate?
     
@@ -217,7 +218,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate {
             let rotationAngle = animationDirectionY * defaultRotationAngle * rotationStrength
     
             var transform = CATransform3DIdentity
-            transform = CATransform3DRotate(transform, rotationAngle, 0, 0, 1)
+//            transform = CATransform3DRotate(transform, rotationAngle, 0, 0, 1)
             transform = CATransform3DTranslate(transform, dragDistance.x, dragDistance.y, 0)
             layer.transform = transform
             
@@ -246,6 +247,13 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate {
     
     func tapRecognized(_ recogznier: UITapGestureRecognizer) {
         delegate?.card(cardWasTapped: self)
+    }
+    
+    // MARK: POPAnimationDelegate
+    
+    public func pop_animationDidApply(_ anim: POPAnimation!) {
+        let point = anim.value(forKey: "currentValue") as! CGPoint
+        delegate?.card(self, touchLetGoWithPopAnimation: point)
     }
     
     //MARK: Private
@@ -345,6 +353,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate {
         resetPositionAnimation?.toValue = NSValue(cgPoint: CGPoint.zero)
         resetPositionAnimation?.springBounciness = cardResetAnimationSpringBounciness
         resetPositionAnimation?.springSpeed = cardResetAnimationSpringSpeed
+        resetPositionAnimation?.delegate = self
         resetPositionAnimation?.completionBlock = {
             (_, _) in
             self.layer.transform = CATransform3DIdentity
