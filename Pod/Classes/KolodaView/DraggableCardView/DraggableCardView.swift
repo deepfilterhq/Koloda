@@ -340,6 +340,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
         translationAnimation?.completionBlock = { _, _ in
             self.removeFromSuperview()
         }
+        translationAnimation?.delegate = self
         layer.pop_add(translationAnimation, forKey: "swipeTranslationAnimation")
     }
     
@@ -397,6 +398,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
             swipePositionAnimation?.fromValue = NSValue(cgPoint:POPLayerGetTranslationXY(layer))
             swipePositionAnimation?.toValue = NSValue(cgPoint:animationPointForDirection(direction))
             swipePositionAnimation?.duration = cardSwipeActionAnimationDuration
+            swipePositionAnimation?.delegate = self
             swipePositionAnimation?.completionBlock = {
                 (_, _) in
                 self.removeFromSuperview()
