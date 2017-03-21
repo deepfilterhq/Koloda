@@ -13,11 +13,12 @@ protocol DraggableCardDelegate: class {
     
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
-    func card(_ card: DraggableCardView, touchLetGoWithPopAnimation translation: CGPoint)
+    func card(_ card: DraggableCardView, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
+    func card(_ card: DraggableCardView, swipedAnimationComplete direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, wasSwipedIn direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, shouldSwipeIn direction: SwipeResultDirection) -> Bool
     func card(cardWasReset card: DraggableCardView)
-    func card(cardWasTapped card: DraggableCardView)
+    func card(cardWasTapped card: DraggableCardView, sender: UITapGestureRecognizer)
     func card(cardSwipeThresholdRatioMargin card: DraggableCardView) -> CGFloat?
     func card(cardAllowedDirections card: DraggableCardView) -> [SwipeResultDirection]
     func card(cardShouldDrag card: DraggableCardView) -> Bool
@@ -246,14 +247,14 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     }
     
     func tapRecognized(_ recogznier: UITapGestureRecognizer) {
-        delegate?.card(cardWasTapped: self)
+        delegate?.card(cardWasTapped: self, sender: recogznier)
     }
     
     // MARK: POPAnimationDelegate
     
     public func pop_animationDidApply(_ anim: POPAnimation!) {
         let point = anim.value(forKey: "currentValue") as! CGPoint
-        delegate?.card(self, touchLetGoWithPopAnimation: point)
+        delegate?.card(self, touchLetGoWithPopAnimation: point, isComplete: false)
     }
     
     //MARK: Private
@@ -339,6 +340,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
         translationAnimation?.toValue = NSValue(cgPoint: animationPointForDirection(direction))
         translationAnimation?.completionBlock = { _, _ in
             self.removeFromSuperview()
+            self.delegate?.card(self, swipedAnimationComplete: direction)
         }
         translationAnimation?.delegate = self
         layer.pop_add(translationAnimation, forKey: "swipeTranslationAnimation")
@@ -359,6 +361,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
             (_, _) in
             self.layer.transform = CATransform3DIdentity
             self.dragBegin = false
+            self.delegate?.card(self, touchLetGoWithPopAnimation: CGPoint.zero, isComplete: true)
         }
         
         layer.pop_add(resetPositionAnimation, forKey: "resetPositionAnimation")
@@ -402,6 +405,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
             swipePositionAnimation?.completionBlock = {
                 (_, _) in
                 self.removeFromSuperview()
+                self.delegate?.card(self, swipedAnimationComplete: direction)
             }
             
             layer.pop_add(swipePositionAnimation, forKey: "swipePositionAnimation")
