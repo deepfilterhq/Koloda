@@ -43,8 +43,8 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     
     private var overlayView: OverlayView?
     private(set) var contentView: UIView?
+    private var frameView = UIView()
     
-    private var panGestureRecognizer: UIPanGestureRecognizer!
     private var tapGestureRecognizer: UITapGestureRecognizer!
     private var animationDirectionY: CGFloat = 1.0
     private var dragBegin = false
@@ -78,14 +78,10 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     }
     
     deinit {
-        removeGestureRecognizer(panGestureRecognizer)
         removeGestureRecognizer(tapGestureRecognizer)
     }
     
     private func setup() {
-        panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(DraggableCardView.panGestureRecognized(_:)))
-        addGestureRecognizer(panGestureRecognizer)
-        panGestureRecognizer.delegate = self
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(DraggableCardView.tapRecognized(_:)))
         tapGestureRecognizer.cancelsTouchesInView = false
         addGestureRecognizer(tapGestureRecognizer)
@@ -108,6 +104,10 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
         
         self.contentView = view
         configureContentView()
+        
+        if let contentView = contentView {
+            frameView.frame = contentView.frame
+        }
     }
     
     private func configureOverlayView() {
@@ -192,15 +192,22 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     }
     
     //MARK: GestureRecognizers
-    func panGestureRecognized(_ gestureRecognizer: UIPanGestureRecognizer) {
-        dragDistance = gestureRecognizer.translation(in: self)
-        
-        let touchLocation = gestureRecognizer.location(in: self)
-        
-        switch gestureRecognizer.state {
-        case .began:
-            
-            let firstTouchPoint = gestureRecognizer.location(in: self)
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        return delegate?.card(cardShouldDrag: self) ?? true
+    }
+    
+    func tapRecognized(_ recogznier: UITapGestureRecognizer) {
+        delegate?.card(cardWasTapped: self, sender: recogznier)
+    }
+    
+    // MARK: Touch
+    
+    var firstTouchPoint : CGPoint!
+    override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let touchLocation = touch.location(in: frameView)
+            firstTouchPoint = touch.location(in: frameView)
             let newAnchorPoint = CGPoint(x: firstTouchPoint.x / bounds.width, y: firstTouchPoint.y / bounds.height)
             let oldPosition = CGPoint(x: bounds.size.width * layer.anchorPoint.x, y: bounds.size.height * layer.anchorPoint.y)
             let newPosition = CGPoint(x: bounds.size.width * newAnchorPoint.x, y: bounds.size.height * newAnchorPoint.y)
@@ -213,13 +220,20 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
             animationDirectionY = touchLocation.y >= frame.size.height / 2 ? -1.0 : 1.0
             layer.rasterizationScale = UIScreen.main.scale
             layer.shouldRasterize = true
+        }
+        super.touchesBegan(touches, with: event)
+    }
+    
+    override public func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let touchPoint = touch.location(in: frameView)
+            dragDistance = CGPoint(x: touchPoint.x - firstTouchPoint.x, y: touchPoint.y - firstTouchPoint.y)
             
-        case .changed:
             let rotationStrength = min(dragDistance.x / frame.width, rotationMax)
             let rotationAngle = animationDirectionY * defaultRotationAngle * rotationStrength
-    
+            
             var transform = CATransform3DIdentity
-//            transform = CATransform3DRotate(transform, rotationAngle, 0, 0, 1)
+            //            transform = CATransform3DRotate(transform, rotationAngle, 0, 0, 1)
             transform = CATransform3DTranslate(transform, dragDistance.x, dragDistance.y, 0)
             layer.transform = transform
             
@@ -230,24 +244,20 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
                 delegate?.card(self, wasDraggedWithFinishPercentage: min(fabs(100 * percentage), 100), inDirection: dragDirection)
                 delegate?.card(self, wasDraggedWithFinishPercentage: min(fabs(100 * percentage), 100), inDirection: dragDirection, transform: transform, translation: dragDistance, rotation: rotationAngle)
             }
-            
-        case .ended:
-            swipeMadeAction()
-            
-            layer.shouldRasterize = false
-            
-        default:
-            layer.shouldRasterize = false
-            resetViewPositionAndTransformations()
         }
+        super.touchesMoved(touches, with: event)
     }
     
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        return delegate?.card(cardShouldDrag: self) ?? true
+    override public func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        swipeMadeAction()
+        layer.shouldRasterize = false
+        super.touchesEnded(touches, with: event)
     }
     
-    func tapRecognized(_ recogznier: UITapGestureRecognizer) {
-        delegate?.card(cardWasTapped: self, sender: recogznier)
+    override public func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        swipeMadeAction()
+        layer.shouldRasterize = false
+        super.touchesCancelled(touches, with: event)
     }
     
     // MARK: POPAnimationDelegate
