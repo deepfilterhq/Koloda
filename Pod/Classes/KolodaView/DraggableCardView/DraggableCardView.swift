@@ -50,6 +50,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     private var dragBegin = false
     private var dragDistance = CGPoint.zero
     private var swipePercentageMargin: CGFloat = 0.0
+    private var firstTouchPoint = CGPoint(x: 0.0, y: 0.0)
     
     //MARK: Lifecycle
     init() {
@@ -203,7 +204,6 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     
     // MARK: Touch
     
-    var firstTouchPoint : CGPoint!
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let touchLocation = touch.location(in: frameView)
