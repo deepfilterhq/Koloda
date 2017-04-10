@@ -582,6 +582,12 @@ open class KolodaView: UIView, DraggableCardDelegate {
         return visibleCards.count > 0
     }
     
+    public func setCanMove(b : Bool) {
+        for card in visibleCards {
+            card.setCanMove(b: b)
+        }
+    }
+    
     // MARK: Cards managing - Insertion
     
     private func insertVisibleCardsWithIndexes(_ visibleIndexes: [Int]) -> [DraggableCardView] {
