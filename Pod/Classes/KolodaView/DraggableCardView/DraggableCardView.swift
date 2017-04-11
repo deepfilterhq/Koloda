@@ -13,7 +13,7 @@ protocol DraggableCardDelegate: class {
     
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
-    func card(_ card: DraggableCardView, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
+    func card(_ card: DraggableCardView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
     func card(_ card: DraggableCardView, swipedAnimationComplete direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, wasSwipedIn direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, shouldSwipeIn direction: SwipeResultDirection) -> Bool
@@ -28,6 +28,12 @@ protocol DraggableCardDelegate: class {
 private let rotationMax: CGFloat = 1.0
 private let defaultRotationAngle = CGFloat(M_PI) / 10.0
 public let cardSwipeActionAnimationDuration: TimeInterval  = 0.4
+
+// Animation Name
+public enum kolodaAnimationName : String {
+    case swipe = "swipeTranslationAnimation"
+    case reset = "resetPositionAnimation"
+}
 
 private let screenSize = UIScreen.main.bounds.size
 
@@ -51,8 +57,6 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     private var dragDistance = CGPoint.zero
     private var swipePercentageMargin: CGFloat = 0.0
     private var firstTouchPoint = CGPoint(x: 0.0, y: 0.0)
-    
-    private var canMove = true
     
     //MARK: Lifecycle
     init() {
@@ -207,11 +211,6 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     // MARK: Touch
     
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard canMove else {
-            print("cant move card")
-            return
-        }
-        
         if let touch = touches.first {
             let touchLocation = touch.location(in: frameView)
             firstTouchPoint = touch.location(in: frameView)
@@ -232,10 +231,6 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     }
     
     override public func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard canMove else {
-            return
-        }
-        
         if let touch = touches.first {
             let touchPoint = touch.location(in: frameView)
             dragDistance = CGPoint(x: touchPoint.x - firstTouchPoint.x, y: touchPoint.y - firstTouchPoint.y)
@@ -275,7 +270,8 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     
     public func pop_animationDidApply(_ anim: POPAnimation!) {
         let point = anim.value(forKey: "currentValue") as! CGPoint
-        delegate?.card(self, touchLetGoWithPopAnimation: point, isComplete: false)
+        let name = kolodaAnimationName(rawValue: anim.name)
+        delegate?.card(self, name: name!, touchLetGoWithPopAnimation: point, isComplete: false)
     }
     
     //MARK: Private
@@ -365,7 +361,8 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
             self.delegate?.card(self, swipedAnimationComplete: direction)
         }
         translationAnimation?.delegate = self
-        layer.pop_add(translationAnimation, forKey: "swipeTranslationAnimation")
+        translationAnimation?.name = kolodaAnimationName.swipe.rawValue
+        layer.pop_add(translationAnimation, forKey: kolodaAnimationName.swipe.rawValue)
     }
     
     private func resetViewPositionAndTransformations() {
@@ -379,14 +376,15 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
         resetPositionAnimation?.springBounciness = cardResetAnimationSpringBounciness
         resetPositionAnimation?.springSpeed = cardResetAnimationSpringSpeed
         resetPositionAnimation?.delegate = self
+        resetPositionAnimation?.name = kolodaAnimationName.reset.rawValue
         resetPositionAnimation?.completionBlock = {
             (_, _) in
             self.layer.transform = CATransform3DIdentity
             self.dragBegin = false
-            self.delegate?.card(self, touchLetGoWithPopAnimation: CGPoint.zero, isComplete: true)
+            self.delegate?.card(self, name: kolodaAnimationName.reset, touchLetGoWithPopAnimation: CGPoint.zero, isComplete: true)
         }
         
-        layer.pop_add(resetPositionAnimation, forKey: "resetPositionAnimation")
+        layer.pop_add(resetPositionAnimation, forKey: kolodaAnimationName.reset.rawValue)
         
         let resetRotationAnimation = POPBasicAnimation(propertyNamed: kPOPLayerRotation)
         resetRotationAnimation?.fromValue = POPLayerGetRotationZ(layer)
@@ -445,9 +443,5 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
             overlayAlphaAnimation?.duration = cardSwipeActionAnimationDuration
             overlayView?.pop_add(overlayAlphaAnimation, forKey: "swipeOverlayAnimation")
         }
-    }
-    
-    func setCanMove(b : Bool) {
-        self.canMove = b
     }
 }

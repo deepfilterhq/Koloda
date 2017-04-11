@@ -49,7 +49,7 @@ public protocol KolodaViewDelegate: class {
     func kolodaShouldTransparentizeNextCard(_ koloda: KolodaView) -> Bool
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection)
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
-    func koloda(_ koloda: KolodaView, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
+    func koloda(_ koloda: KolodaView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
     func koloda(_ koloda: KolodaView, swipedAnimationComplete direction: SwipeResultDirection)
     func kolodaDidResetCard(_ koloda: KolodaView)
     func kolodaSwipeThresholdRatioMargin(_ koloda: KolodaView) -> CGFloat?
@@ -71,7 +71,7 @@ public extension KolodaViewDelegate {
     func kolodaShouldTransparentizeNextCard(_ koloda: KolodaView) -> Bool { return true }
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection) {}
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat) {}
-    func koloda(_ koloda: KolodaView, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool) {}
+    func koloda(_ koloda: KolodaView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool) {}
     func koloda(_ koloda: KolodaView, swipedAnimationComplete direction: SwipeResultDirection) {}
     func kolodaDidResetCard(_ koloda: KolodaView) {}
     func kolodaSwipeThresholdRatioMargin(_ koloda: KolodaView) -> CGFloat? { return nil}
@@ -268,8 +268,8 @@ open class KolodaView: UIView, DraggableCardDelegate {
         delegate?.koloda(self, draggedCardWithPercentage: percentage, in: direction, transform: transform, translation: translation, rotation: rotation)
     }
     
-    func card(_ card: DraggableCardView, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool) {
-        delegate?.koloda(self, touchLetGoWithPopAnimation: translation, isComplete: isComplete)
+    func card(_ card: DraggableCardView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool) {
+        delegate?.koloda(self, name: name, touchLetGoWithPopAnimation: translation, isComplete: isComplete)
     }
     
     func card(_ card: DraggableCardView, swipedAnimationComplete direction: SwipeResultDirection) {
@@ -580,12 +580,6 @@ open class KolodaView: UIView, DraggableCardDelegate {
         }
         
         return visibleCards.count > 0
-    }
-    
-    public func setCanMove(b : Bool) {
-        for card in visibleCards {
-            card.setCanMove(b: b)
-        }
     }
     
     // MARK: Cards managing - Insertion
