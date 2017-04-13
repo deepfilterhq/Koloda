@@ -14,7 +14,6 @@ protocol DraggableCardDelegate: class {
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
     func card(_ card: DraggableCardView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
-    func card(_ card: DraggableCardView, swipedAnimationComplete direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, wasSwipedIn direction: SwipeResultDirection)
     func card(_ card: DraggableCardView, shouldSwipeIn direction: SwipeResultDirection) -> Bool
     func card(cardWasReset card: DraggableCardView)
@@ -48,7 +47,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     weak var delegate: DraggableCardDelegate?
     
     private var overlayView: OverlayView?
-    private(set) var contentView: UIView?
+    private(set) public var contentView: UIView?
     private var frameView = UIView()
     
     private var tapGestureRecognizer: UITapGestureRecognizer!
@@ -358,7 +357,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
         translationAnimation?.toValue = NSValue(cgPoint: animationPointForDirection(direction))
         translationAnimation?.completionBlock = { _, _ in
             self.removeFromSuperview()
-            self.delegate?.card(self, swipedAnimationComplete: direction)
+            self.delegate?.card(self, name: kolodaAnimationName.swipe, touchLetGoWithPopAnimation: CGPoint.zero, isComplete: true)
         }
         translationAnimation?.delegate = self
         translationAnimation?.name = kolodaAnimationName.swipe.rawValue
@@ -425,7 +424,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
             swipePositionAnimation?.completionBlock = {
                 (_, _) in
                 self.removeFromSuperview()
-                self.delegate?.card(self, swipedAnimationComplete: direction)
+                self.delegate?.card(self, name: kolodaAnimationName.swipe, touchLetGoWithPopAnimation: CGPoint.zero, isComplete: true)
             }
             
             layer.pop_add(swipePositionAnimation, forKey: "swipePositionAnimation")

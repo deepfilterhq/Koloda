@@ -49,8 +49,7 @@ public protocol KolodaViewDelegate: class {
     func kolodaShouldTransparentizeNextCard(_ koloda: KolodaView) -> Bool
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection)
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat)
-    func koloda(_ koloda: KolodaView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
-    func koloda(_ koloda: KolodaView, swipedAnimationComplete direction: SwipeResultDirection)
+    func koloda(_ card: DraggableCardView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool)
     func kolodaDidResetCard(_ koloda: KolodaView)
     func kolodaSwipeThresholdRatioMargin(_ koloda: KolodaView) -> CGFloat?
     func koloda(_ koloda: KolodaView, didShowCardAt index: Int)
@@ -71,8 +70,7 @@ public extension KolodaViewDelegate {
     func kolodaShouldTransparentizeNextCard(_ koloda: KolodaView) -> Bool { return true }
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection) {}
     func koloda(_ koloda: KolodaView, draggedCardWithPercentage finishPercentage: CGFloat, in direction: SwipeResultDirection, transform: CATransform3D, translation: CGPoint, rotation: CGFloat) {}
-    func koloda(_ koloda: KolodaView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool) {}
-    func koloda(_ koloda: KolodaView, swipedAnimationComplete direction: SwipeResultDirection) {}
+    func koloda(_ card: DraggableCardView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool) {}
     func kolodaDidResetCard(_ koloda: KolodaView) {}
     func kolodaSwipeThresholdRatioMargin(_ koloda: KolodaView) -> CGFloat? { return nil}
     func koloda(_ koloda: KolodaView, didShowCardAt index: Int) {}
@@ -269,11 +267,7 @@ open class KolodaView: UIView, DraggableCardDelegate {
     }
     
     func card(_ card: DraggableCardView, name: kolodaAnimationName, touchLetGoWithPopAnimation translation: CGPoint, isComplete: Bool) {
-        delegate?.koloda(self, name: name, touchLetGoWithPopAnimation: translation, isComplete: isComplete)
-    }
-    
-    func card(_ card: DraggableCardView, swipedAnimationComplete direction: SwipeResultDirection) {
-        delegate?.koloda(self, swipedAnimationComplete: direction)
+        delegate?.koloda(card, name: name, touchLetGoWithPopAnimation: translation, isComplete: isComplete)
     }
     
     func card(_ card: DraggableCardView, shouldSwipeIn direction: SwipeResultDirection) -> Bool {
