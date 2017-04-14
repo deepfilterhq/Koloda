@@ -513,15 +513,20 @@ open class KolodaView: UIView, DraggableCardDelegate {
             return
         }
         
-        if currentCardIndex == 0 {
-            clear()
-        }
-        
         countOfCards = Int(numberOfCards)
         if countOfCards - (currentCardIndex + visibleCards.count) > 0 {
             if !visibleCards.isEmpty {
+                
+                var visibleIndex = currentCardIndex
+                for card in visibleCards {
+                    configureCard(card, at: visibleIndex)
+                    visibleIndex = visibleIndex + 1
+                }
+                self.delegate?.koloda(self, didShowCardAt: currentCardIndex)
+                
                 let missingCards = missingCardsCount()
                 loadMissingCards(missingCards)
+                
             } else {
                 setupDeck()
                 layoutDeck()
