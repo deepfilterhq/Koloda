@@ -33,7 +33,6 @@ protocol DraggableCardDelegate: class {
 
 //Drag animation constants
 private let rotationMax: CGFloat = 1.0
-public let cardSwipeActionAnimationDuration: TimeInterval  = 0.4
 private let defaultRotationAngle = CGFloat(Double.pi) / 10.0
 
 // Animation Name
