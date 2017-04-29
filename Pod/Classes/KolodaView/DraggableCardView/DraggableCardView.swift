@@ -9,6 +9,13 @@
 import UIKit
 import pop
 
+public enum DragSpeed: TimeInterval {
+    case slow = 2.0
+    case moderate = 1.5
+    case `default` = 0.8
+    case fast = 0.4
+}
+
 protocol DraggableCardDelegate: class {
     
     func card(_ card: DraggableCardView, wasDraggedWithFinishPercentage percentage: CGFloat, inDirection direction: SwipeResultDirection)
@@ -21,12 +28,13 @@ protocol DraggableCardDelegate: class {
     func card(cardSwipeThresholdRatioMargin card: DraggableCardView) -> CGFloat?
     func card(cardAllowedDirections card: DraggableCardView) -> [SwipeResultDirection]
     func card(cardShouldDrag card: DraggableCardView) -> Bool
+    func card(cardSwipeSpeed card: DraggableCardView) -> DragSpeed
 }
 
 //Drag animation constants
 private let rotationMax: CGFloat = 1.0
-private let defaultRotationAngle = CGFloat(M_PI) / 10.0
 public let cardSwipeActionAnimationDuration: TimeInterval  = 0.4
+private let defaultRotationAngle = CGFloat(Double.pi) / 10.0
 
 // Animation Name
 public enum kolodaAnimationName : String {
@@ -41,6 +49,7 @@ private let cardResetAnimationSpringBounciness: CGFloat = 10.0
 private let cardResetAnimationSpringSpeed: CGFloat = 20.0
 private let cardResetAnimationKey = "resetPositionAnimation"
 private let cardResetAnimationDuration: TimeInterval = 0.2
+internal var cardSwipeActionAnimationDuration: TimeInterval = DragSpeed.default.rawValue
 
 public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimationDelegate {
     
@@ -91,6 +100,10 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(DraggableCardView.tapRecognized(_:)))
         tapGestureRecognizer.cancelsTouchesInView = false
         addGestureRecognizer(tapGestureRecognizer)
+
+        if let delegate = delegate {
+            cardSwipeActionAnimationDuration = delegate.card(cardSwipeSpeed: self).rawValue
+        }
     }
     
     //MARK: Configurations
@@ -343,7 +356,7 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     }
     
     private func animationRotationForDirection(_ direction: SwipeResultDirection) -> CGFloat {
-        return CGFloat(direction.bearing / 2.0 - M_PI_4)
+        return CGFloat(direction.bearing / 2.0 - Double.pi / 4)
     }
 
     
