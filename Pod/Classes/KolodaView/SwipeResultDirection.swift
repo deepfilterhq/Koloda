@@ -169,6 +169,20 @@ extension CGPoint {
         }
         return nil
     }
+    
+    func length() -> CGFloat {
+        return sqrt(x*x + y*y)
+    }
+    
+    func normalized() -> CGPoint {
+        return CGPoint(x: x / length(), y: y / length())
+    }
+    
+    func outsideScreenPoint(_ screenSize: CGSize) -> CGPoint {
+        let x = 1.0 * self.x * screenSize.height
+        let y = 1.0 * self.y * screenSize.height
+        return CGPoint(x: x, y: y)
+    }
 }
 
 typealias CGLine = (start: CGPoint, end: CGPoint)

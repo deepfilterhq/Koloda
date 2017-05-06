@@ -349,9 +349,8 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
     }
     
     private func animationPointForDirection(_ direction: SwipeResultDirection) -> CGPoint {
-        let point = direction.point
-        let animatePoint = CGPoint(x: point.x * 4, y: point.y * 4) //should be 2
-        let retPoint = animatePoint.screenPointForSize(screenSize)
+        let point = dragDistance.normalized()
+        let retPoint = point.outsideScreenPoint(screenSize)
         return retPoint
     }
     
