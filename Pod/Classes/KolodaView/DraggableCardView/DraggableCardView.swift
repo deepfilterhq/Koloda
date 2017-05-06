@@ -76,8 +76,9 @@ public class DraggableCardView: UIView, UIGestureRecognizerDelegate, POPAnimatio
         setup()
     }
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, delegate: DraggableCardDelegate? = nil) {
         super.init(frame: frame)
+        self.delegate = delegate
         setup()
     }
     
